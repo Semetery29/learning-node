@@ -4,6 +4,7 @@ const http = require("http");
 const server = http.createServer();
 const fs = require("fs");
 const { buffer } = require("stream/consumers");
+const { error } = require("console");
 
 // listener
 server.on("request", (req, res) => {
@@ -13,11 +14,18 @@ server.on("request", (req, res) => {
   const readableStream = fs.createReadStream(process.cwd() + "/texts/read.txt");
 
   readableStream.on("data", (buffer) => {
+    res.statusCode = 200;
     res.write(buffer);
   });
 
   readableStream.on("end", () => {
-    res.end("Hello from World.");
+    res.end("The Streaming is over!");
+  });
+
+  readableStream.on("error", (error) => {
+    console.log(error);
+    res.statusCode = 500;
+    res.end("Something went Wrong.");
   });
 });
 
