@@ -1,3 +1,4 @@
+import { error } from "console";
 import express, { NextFunction, Request, Response } from "express";
 const app = express();
 const port = 3000;
@@ -42,8 +43,17 @@ const logger = (req: Request, res: Response, next: NextFunction) => {
   next();
 };
 
-app.get("/", logger, (req: Request, res: Response) => {
-  res.send("Hello Worlds!");
+app.get("/", logger, (req: Request, res: Response, next: NextFunction) => {
+  try {
+    res.send(something);
+  } catch (err) {
+    console.log(err);
+    next(error);
+    // res.status(400).json({
+    //   success: false,
+    //   message: "failed to get data.",
+    // });
+  }
 });
 
 app.post("/", logger, (req: Request, res: Response) => {
@@ -51,6 +61,23 @@ app.post("/", logger, (req: Request, res: Response) => {
   res.json({
     message: "successfully received data",
   });
+});
+
+app.all("*", (req: Request, res: Response) => {
+  res.status(400).json({
+    success: false,
+    message: "Route is not found.",
+  });
+});
+
+// global error handler
+app.use((error: any, req: Request, res: Response, next: NextFunction) => {
+  if (error) {
+    res.status(400).json({
+      success: false,
+      message: "something went wrong.",
+    });
+  }
 });
 
 export default app;
